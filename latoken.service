@@ -1,0 +1,13 @@
+[Unit]
+Description=[Latoken-bot service]
+
+[Service]
+Type=simple
+User=max
+WorkingDirectory=/home/max/latoken
+ExecStart=/home/max/latoken/latoken.sh
+UMask=000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
