@@ -238,25 +238,30 @@ async def oai_answer(message: types.Message):
             del user_api_key[message.from_user.id]
         del user_set_api_key[message.from_user.id]
     # Если пользователь в режиме теста
-    elif message.from_user.id in user_test:
-        await message.answer(f'Не подглядывай!')
-    else:
-        # Если пользователю не был задан вопрос
-        if message.from_user.id not in user_data:
-            # Если пользователь не выбрал контекст
-            if message.from_user.id not in user_context:
-                oai_answer = oai_context(message.from_user.id, message.text)
-                svmess(message.from_user.id, oai_answer)
-            # Если пользователь выбрал контекст
-            else:
-                cntx = user_context[message.from_user.id]
-                oai_answer = oai_context(message.from_user.id, message.text, cntx)
-                svmess(message.from_user.id, oai_answer, cntx=cntx['name'])
-        # Если пользователю был задан вопрос
+    elif check_openai_api_key():
+        if message.from_user.id in user_test:
+            await message.answer(f'Не подглядывай!')
         else:
-            oai_answer = oai_check_answer(message.from_user.id, user_data[message.from_user.id], message.text)
-            del user_data[message.from_user.id]
-        await message.answer(f'{oai_answer}')
+            # Если пользователю не был задан вопрос
+            if message.from_user.id not in user_data:
+                # Если пользователь не выбрал контекст
+                if message.from_user.id not in user_context:
+                    oai_answer = oai_context(message.from_user.id, message.text)
+                    svmess(message.from_user.id, oai_answer)
+                # Если пользователь выбрал контекст
+                else:
+                    cntx = user_context[message.from_user.id]
+                    oai_answer = oai_context(message.from_user.id, message.text, cntx)
+                    svmess(message.from_user.id, oai_answer, cntx=cntx['name'])
+            # Если пользователю был задан вопрос
+            else:
+                oai_answer = oai_check_answer(message.from_user.id, user_data[message.from_user.id], message.text)
+                del user_data[message.from_user.id]
+            await message.answer(f'{oai_answer}')
+    else:
+        buttons = ['Ввести OpenAI API key', '/start']
+        await message.answer(f'Для работы бота нужен OpenAI API key.\n'
+                             f'https://platform.openai.com/settings/organization/api-keys', reply_markup=keyboard(buttons))
 
 async def main():
     print("Start bot")
